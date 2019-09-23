@@ -53,7 +53,7 @@ import net.runelite.client.plugins.PluginType;
 
 @PluginDescriptor(
 	name = "Mes Enhanced",
-	description = "1 Click MES Features -DO NOT ABUSE/AUTOCLICK THESE-",
+	description = "1 Click MES Features",
 	type = PluginType.UTILITY
 )
 public class MesEnhanced extends Plugin
@@ -61,9 +61,19 @@ public class MesEnhanced extends Plugin
 	private static final int GOBLIN_SALUTE = 2128;
 	private static final String LIGHT = "Light";
 	private static final String QUICK_BONE = "Quick Bone";
+	private static final String FLETCH = "Fletch";
+
 	private static final Set<Integer> TINDER = ImmutableSet.of(
 		ItemID.TINDERBOX, ItemID.GOLDEN_TINDERBOX
 	);
+	private static final Set<Integer> FEATHER = ImmutableSet.of(
+			ItemID.FEATHER
+	);
+
+	private static final Set<Integer> ACTIONABLE_AMMO = ImmutableSet.of(
+			ItemID.DRAGON_DART_TIP, ItemID.DRAGON_BOLTS_UNF, ItemID.ADAMANT_DART_TIP, ItemID.MITHRIL_DART_TIP
+	);
+
 	private static final Set<Integer> LIGHTABLE_LOGS = ImmutableSet.of(
 		ItemID.LOGS, ItemID.ACHEY_TREE_LOGS, ItemID.OAK_LOGS,
 		ItemID.WILLOW_LOGS, ItemID.TEAK_LOGS, ItemID.ARCTIC_PINE_LOGS, ItemID.MAPLE_LOGS,
@@ -77,21 +87,31 @@ public class MesEnhanced extends Plugin
 		ItemID.DAGANNOTH_BONES, ItemID.OURG_BONES, ItemID.SUPERIOR_DRAGON_BONES
 	);
 
+
+
 	@Inject
 	private Client client;
 	@Inject
 	private EventBus eventBus;
 	@Inject
 	private MesEnhancedConfig config;
-	private boolean bones;
+
 	private boolean leftClickLog;
 	private boolean quickBone;
+	private boolean quickDart;
+
 	private boolean tick;
 	private boolean tinder;
+	private boolean feather;
+	private boolean bones;
+	private boolean darts;
+
 	private int bonesId;
 	private int bonesIdx;
 	private int tinderId;
 	private int tinderIdx;
+	private int featherId;
+	private int featherIdx;
 
 	@Provides
 	MesEnhancedConfig getConfig(ConfigManager configManager)
@@ -125,6 +145,7 @@ public class MesEnhanced extends Plugin
 
 		this.quickBone = config.quickBones();
 		this.leftClickLog = config.leftClickLog();
+		this.quickDart = config.quickDarts();
 	}
 
 	private void onGameTick(GameTick event)
@@ -148,7 +169,7 @@ public class MesEnhanced extends Plugin
 
 	private void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		if (!this.leftClickLog && !this.quickBone)
+		if (!this.leftClickLog && !this.quickBone  && !this.quickDart)
 		{
 			return;
 		}
@@ -167,11 +188,17 @@ public class MesEnhanced extends Plugin
 			event.getMenuEntry().setOption(QUICK_BONE);
 			event.setWasModified(true);
 		}
+		else if (this.quickDart && feather && event.getType() == MenuOpcode.ITEM_USE.getId()
+				&& ACTIONABLE_AMMO.contains(id))
+		{
+			event.getMenuEntry().setOption(FLETCH);
+			event.setWasModified(true);
+		}
 	}
 
 	private void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (!this.leftClickLog && !this.quickBone)
+		if (!this.leftClickLog && !this.quickBone  && !this.quickDart)
 		{
 			return;
 		}
@@ -185,6 +212,14 @@ public class MesEnhanced extends Plugin
 			client.setSelectedItemWidget(WidgetInfo.INVENTORY.getId());
 			client.setSelectedItemSlot(tinderIdx);
 			client.setSelectedItemID(tinderId);
+		}
+		else if (this.quickDart && feather && event.getOpcode() == MenuOpcode.ITEM_USE.getId()
+				&& event.getOption().equals(FLETCH))
+		{
+			entry.setOpcode(MenuOpcode.ITEM_USE_ON_WIDGET_ITEM.getId());
+			client.setSelectedItemWidget(WidgetInfo.INVENTORY.getId());
+			client.setSelectedItemSlot(featherIdx);
+			client.setSelectedItemID(featherId);
 		}
 		else if (this.quickBone && bones && event.getOption().equals(QUICK_BONE) && tick)
 		{
@@ -203,7 +238,7 @@ public class MesEnhanced extends Plugin
 
 	private void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (!this.leftClickLog && !this.quickBone)
+		if (!this.leftClickLog && !this.quickBone && !this.quickDart)
 		{
 			return;
 		}
@@ -212,17 +247,23 @@ public class MesEnhanced extends Plugin
 		final List<Item> items = Arrays.asList(itemContainer.getItems());
 
 		if (itemContainer != client.getItemContainer(InventoryID.INVENTORY) ||
-			(!Collections.disjoint(items, BONES) && !Collections.disjoint(items, LIGHTABLE_LOGS)))
+			(!Collections.disjoint(items, BONES) && !Collections.disjoint(items, LIGHTABLE_LOGS) && !Collections.disjoint(items, ACTIONABLE_AMMO)))
 		{
 			return;
 		}
 
+		featherIdx = -1;
+		featherId = -1;
+
 		tinderIdx = -1;
 		tinderId = -1;
+
 		bonesIdx = -1;
 		bonesId = -1;
+
 		tinder = false;
 		bones = false;
+		feather = false;
 
 		for (int i = 0; i < items.size(); i++)
 		{
@@ -239,6 +280,13 @@ public class MesEnhanced extends Plugin
 				bonesIdx = i;
 				bonesId = itemId;
 				bones = true;
+				break;
+			}
+			else if (FEATHER.contains(itemId))
+			{
+				featherIdx = i;
+				featherId = itemId;
+				feather = true;
 				break;
 			}
 		}

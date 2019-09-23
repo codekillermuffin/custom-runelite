@@ -52,4 +52,15 @@ public interface MesEnhancedConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "quickDarts",
+			name = "1 Click Darts",
+			description = "This will allow you to left click unfinished bolts to make them.",
+			position = 2
+	)
+	default boolean quickDarts()
+	{
+		return false;
+	}
 }
