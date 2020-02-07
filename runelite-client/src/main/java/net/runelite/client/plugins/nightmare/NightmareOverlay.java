@@ -2,23 +2,29 @@ package net.runelite.client.plugins.nightmare;
 
 import net.runelite.api.Client;
 import net.runelite.api.GraphicsObject;
-import net.runelite.api.NPC;
+//import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.client.plugins.zulrah.ImagePanelComponent;
-import net.runelite.client.ui.overlay.*;
-import net.runelite.client.ui.overlay.components.PanelComponent;
-import net.runelite.client.ui.overlay.components.TextComponent;
-
+import net.runelite.client.ui.overlay.Overlay;
+import net.runelite.client.ui.overlay.OverlayLayer;
+import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.OverlayPriority;
+import net.runelite.client.ui.overlay.OverlayUtil;
+//import net.runelite.client.plugins.zulrah.ImagePanelComponent;
+//import net.runelite.client.ui.overlay.components.PanelComponent;
+//import net.runelite.client.ui.overlay.components.TextComponent;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Dimension;
+import java.awt.Polygon;
+//import java.util.ArrayList;
+//import java.util.Objects;
 
 @Singleton
-class NightmareOverlay extends Overlay {
+class NightmareOverlay extends Overlay
+{
 	private static final int NIGHTMARE_REGION_ID = 15256;
 	private final Client client;
 	private final NightmarePlugin plugin;
@@ -61,7 +67,8 @@ class NightmareOverlay extends Overlay {
 
 
 	@Inject
-	private NightmareOverlay(final Client client, final NightmarePlugin plugin) {
+	private NightmareOverlay(final Client client, final NightmarePlugin plugin)
+	{
 		this.client = client;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
@@ -70,7 +77,8 @@ class NightmareOverlay extends Overlay {
 	}
 
 	@Override
-	public Dimension render(Graphics2D graphics) {
+	public Dimension render(Graphics2D graphics)
+	{
 //		final ArrayList<Integer> regions = new ArrayList<>();
 //		for (final int intValue : client.getMapRegions())
 //		{
@@ -98,26 +106,31 @@ class NightmareOverlay extends Overlay {
 //			}
 //		}
 
-		if (!client.isInInstancedRegion()) {
+		if (!client.isInInstancedRegion())
+		{
 			return null;
 		}
 
 
 		// TODO: Awaiting GraphicsObjectDespawn event to be tracked to make this more efficient.
-		for (GraphicsObject graphicsObject : client.getGraphicsObjects()) {
+		for (GraphicsObject graphicsObject : client.getGraphicsObjects())
+		{
 			Color color;
 
-			if (graphicsObject.getId() == NIGHTMARE_SHADOW) {
+			if (graphicsObject.getId() == NIGHTMARE_SHADOW)
+			{
 				color = Color.ORANGE;
 			}
-			else {
+			else
+				{
 				continue;
 			}
 
 			LocalPoint lp = graphicsObject.getLocation();
 			Polygon poly = Perspective.getCanvasTilePoly(client, lp);
 
-			if (poly != null) {
+			if (poly != null)
+			{
 				OverlayUtil.renderPolygon(graphics, poly, color);
 			}
 //			if (plugin.isInFight() && plugin.getNm() != null && plugin.getNm().getLocalLocation() != null) {

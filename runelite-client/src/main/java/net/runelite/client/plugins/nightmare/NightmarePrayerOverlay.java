@@ -10,16 +10,18 @@ import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.ImageComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 
 
 @Singleton
-public class NightmarePrayerOverlay extends Overlay {
+public class NightmarePrayerOverlay extends Overlay
+{
 	private static final Color NOT_ACTIVATED_BACKGROUND_COLOR = new Color(150, 0, 0, 150);
 	private final Client client;
 	private final NightmarePlugin plugin;
@@ -28,7 +30,8 @@ public class NightmarePrayerOverlay extends Overlay {
 	private static final int NM_PRE_REGION = 15256;
 
 	@Inject
-	private NightmarePrayerOverlay(final Client client, final NightmarePlugin plugin, final SpriteManager spriteManager) {
+	private NightmarePrayerOverlay(final Client client, final NightmarePlugin plugin, final SpriteManager spriteManager)
+	{
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		setPriority(OverlayPriority.HIGH);
 		setPosition(OverlayPosition.DYNAMIC);
@@ -38,9 +41,11 @@ public class NightmarePrayerOverlay extends Overlay {
 		this.spriteManager = spriteManager;
 	}
 
-	public Dimension render(Graphics2D graphics) {
+	public Dimension render(Graphics2D graphics)
+	{
 		imagePanelComponent.getChildren().clear();
-		if ((plugin.isInFight()) && (plugin.getPrayAgainst() != null) && (plugin.getNm() != null)) {
+		if ((plugin.isInFight()) && (plugin.getPrayAgainst() != null) && (plugin.getNm() != null))
+		{
 			NightmareAttack attack = plugin.getPrayAgainst();
 			BufferedImage prayerImage;
 			prayerImage = getPrayerImage(attack);
@@ -81,7 +86,8 @@ public class NightmarePrayerOverlay extends Overlay {
 		return null;
 	}
 
-	private BufferedImage getPrayerImage(NightmareAttack attack) {
+	private BufferedImage getPrayerImage(NightmareAttack attack)
+	{
 		int prayerSpriteID = 127;
 		if (attack == NightmareAttack.MELEE) prayerSpriteID = 129;
 		else if (attack == NightmareAttack.RANGE) prayerSpriteID = 128;
